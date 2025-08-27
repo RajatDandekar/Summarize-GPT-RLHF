@@ -90,10 +90,8 @@ def batch_end_callback(trainer):
 
     if trainer.iter_num % trainer.config.generate_every == 0:
         with torch.no_grad():
-            sample_prompt, attn_mask = prompt_ds[0]
-            prompt_start = attn_mask.long().argmin()
-            sample_prompt, attn_mask = sample_prompt[prompt_start:].to(device), attn_mask[prompt_start:].to(device)
-            idx = model.generate(sample_prompt[None], max_new_tokens=128, do_sample=True, temperature=0.7, attention_mask=attn_mask[None]).cpu()
+            sample_prompt = prompt_ds[0].to(device)
+            idx = model.generate(sample_prompt, max_new_tokens=128, do_sample=True, temperature=0.7).cpu()
             for j,generation in enumerate(idx):
                 print(f"Generation {j}:", train_ds.tokenizer.decode(generation))
 
@@ -159,7 +157,7 @@ if __name__ == '__main__':
     sample_prompt = prompt_ds[0].to(device)
     idx = model.generate(sample_prompt, max_new_tokens=128, do_sample=True, top_k=30, stop_at=train_ds.tokenizer.eot_token).cpu()
     for j,generation in enumerate(idx):
-        print(f"Generation {j}:", train_ds.tokenizer.decode(generation))
+        print(f"Generation {j}:", train_ds.tokenizer.decode(generation))``
 
     # Plot the losses
     trainer.logger.plot({"Loss": ["Train", "Valid"]}, filename="summarize_sft.png")
